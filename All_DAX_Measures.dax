@@ -1,0 +1,273 @@
+// ============================================================
+// E-COMMERCE SALES & PROFITABILITY DASHBOARD - DAX MEASURES
+// ============================================================
+// Paste each measure into Power BI via:
+//   Modeling tab → New Measure → paste the formula → Enter
+// ============================================================
+
+
+// ------------------------------------------------------------
+// 1. CORE AGGREGATION MEASURES
+// ------------------------------------------------------------
+
+Total Revenue =
+SUM( Sales[revenue] )
+
+Total Profit =
+SUM( Sales[profit] )
+
+Total Orders =
+DISTINCTCOUNT( Sales[order_id] )
+
+Total Quantity =
+SUM( Sales[quantity] )
+
+Total Customers =
+DISTINCTCOUNT( Sales[customer_id] )
+
+Total Shipping Cost =
+SUM( Sales[shipping_cost] )
+
+Total Discount Value =
+SUMX(
+    Sales,
+    Sales[product_price] * Sales[quantity] * ( Sales[discount_percent] / 100 )
+)
+
+Avg Rating =
+AVERAGE( Sales[rating] )
+
+Avg Shipping Cost =
+AVERAGE( Sales[shipping_cost] )
+
+Avg Order Value =
+DIVIDE( [Total Revenue], [Total Orders], 0 )
+
+
+// ------------------------------------------------------------
+// 2. RETURN ANALYSIS MEASURES
+// ------------------------------------------------------------
+
+Total Returned Orders =
+CALCULATE(
+    COUNTROWS( Sales ),
+    Sales[is_returned] = 1
+)
+
+Return Rate =
+DIVIDE(
+    [Total Returned Orders],
+    [Total Orders],
+    0
+)
+// Format this as % in the Measure formatting pane
+
+Not Returned Orders =
+[Total Orders] - [Total Returned Orders]
+
+Lost Revenue =
+CALCULATE(
+    SUM( Sales[revenue] ),
+    Sales[is_returned] = 1
+)
+
+Return Rate % Label =
+FORMAT( [Return Rate], "0.00%" )
+
+
+// ------------------------------------------------------------
+// 3. PREVIOUS YEAR (PY) MEASURES
+// (Requires a Date table — see build guide Step 3 for setup)
+// ------------------------------------------------------------
+
+PY Total Revenue =
+CALCULATE(
+    [Total Revenue],
+    DATEADD( DateTable[Date], -1, YEAR )
+)
+
+PY Total Profit =
+CALCULATE(
+    [Total Profit],
+    DATEADD( DateTable[Date], -1, YEAR )
+)
+
+PY Total Orders =
+CALCULATE(
+    [Total Orders],
+    DATEADD( DateTable[Date], -1, YEAR )
+)
+
+PY Total Quantity =
+CALCULATE(
+    [Total Quantity],
+    DATEADD( DateTable[Date], -1, YEAR )
+)
+
+PY Total Customers =
+CALCULATE(
+    [Total Customers],
+    DATEADD( DateTable[Date], -1, YEAR )
+)
+
+PY Lost Revenue =
+CALCULATE(
+    [Lost Revenue],
+    DATEADD( DateTable[Date], -1, YEAR )
+)
+
+PY Return Rate =
+CALCULATE(
+    [Return Rate],
+    DATEADD( DateTable[Date], -1, YEAR )
+)
+
+PY Avg Rating =
+CALCULATE(
+    [Avg Rating],
+    DATEADD( DateTable[Date], -1, YEAR )
+)
+
+PY Total Discount Value =
+CALCULATE(
+    [Total Discount Value],
+    DATEADD( DateTable[Date], -1, YEAR )
+)
+
+PY Avg Shipping Cost =
+CALCULATE(
+    [Avg Shipping Cost],
+    DATEADD( DateTable[Date], -1, YEAR )
+)
+
+
+// ------------------------------------------------------------
+// 4. GROWTH % (vs Previous Year) MEASURES
+// These power the "▲ 18.6% vs PY" text on KPI cards
+// ------------------------------------------------------------
+
+Revenue Growth % =
+VAR _PY = [PY Total Revenue]
+RETURN
+DIVIDE( [Total Revenue] - _PY, _PY, 0 )
+
+Profit Growth % =
+VAR _PY = [PY Total Profit]
+RETURN
+DIVIDE( [Total Profit] - _PY, _PY, 0 )
+
+Orders Growth % =
+VAR _PY = [PY Total Orders]
+RETURN
+DIVIDE( [Total Orders] - _PY, _PY, 0 )
+
+Quantity Growth % =
+VAR _PY = [PY Total Quantity]
+RETURN
+DIVIDE( [Total Quantity] - _PY, _PY, 0 )
+
+Customers Growth % =
+VAR _PY = [PY Total Customers]
+RETURN
+DIVIDE( [Total Customers] - _PY, _PY, 0 )
+
+Lost Revenue Growth % =
+VAR _PY = [PY Lost Revenue]
+RETURN
+DIVIDE( [Lost Revenue] - _PY, _PY, 0 )
+
+Return Rate Change % =
+[Return Rate] - [PY Return Rate]
+
+Avg Rating Change =
+[Avg Rating] - [PY Avg Rating]
+
+Discount Growth % =
+VAR _PY = [PY Total Discount Value]
+RETURN
+DIVIDE( [Total Discount Value] - _PY, _PY, 0 )
+
+Shipping Cost Growth % =
+VAR _PY = [PY Avg Shipping Cost]
+RETURN
+DIVIDE( [Avg Shipping Cost] - _PY, _PY, 0 )
+
+
+// ------------------------------------------------------------
+// 5. KPI CARD SUBTITLE LABELS
+// These combine arrow icon + % + "vs PY" into one text label
+// Use these in a Card visual's Subtitle or a separate Text box
+// ------------------------------------------------------------
+
+Revenue vs PY Label =
+VAR _growth = [Revenue Growth %]
+VAR _arrow = IF( _growth >= 0, "▲ ", "▼ " )
+RETURN _arrow & FORMAT( ABS(_growth), "0.0%" ) & " vs PY"
+
+Profit vs PY Label =
+VAR _growth = [Profit Growth %]
+VAR _arrow = IF( _growth >= 0, "▲ ", "▼ " )
+RETURN _arrow & FORMAT( ABS(_growth), "0.0%" ) & " vs PY"
+
+Orders vs PY Label =
+VAR _growth = [Orders Growth %]
+VAR _arrow = IF( _growth >= 0, "▲ ", "▼ " )
+RETURN _arrow & FORMAT( ABS(_growth), "0.0%" ) & " vs PY"
+
+Quantity vs PY Label =
+VAR _growth = [Quantity Growth %]
+VAR _arrow = IF( _growth >= 0, "▲ ", "▼ " )
+RETURN _arrow & FORMAT( ABS(_growth), "0.0%" ) & " vs PY"
+
+Customers vs PY Label =
+VAR _growth = [Customers Growth %]
+VAR _arrow = IF( _growth >= 0, "▲ ", "▼ " )
+RETURN _arrow & FORMAT( ABS(_growth), "0.0%" ) & " vs PY"
+
+Lost Revenue vs PY Label =
+VAR _growth = [Lost Revenue Growth %]
+VAR _arrow = IF( _growth >= 0, "▲ ", "▼ " )
+RETURN _arrow & FORMAT( ABS(_growth), "0.0%" ) & " vs PY"
+
+Return Rate vs PY Label =
+VAR _change = [Return Rate Change %]
+VAR _arrow = IF( _change >= 0, "▲ ", "▼ " )
+RETURN _arrow & FORMAT( ABS(_change), "0.00%" ) & " vs PY"
+
+Avg Rating vs PY Label =
+VAR _change = [Avg Rating Change]
+VAR _arrow = IF( _change >= 0, "▲ ", "▼ " )
+RETURN _arrow & FORMAT( ABS(_change), "0.00" ) & " vs PY"
+
+Discount vs PY Label =
+VAR _growth = [Discount Growth %]
+VAR _arrow = IF( _growth >= 0, "▲ ", "▼ " )
+RETURN _arrow & FORMAT( ABS(_growth), "0.0%" ) & " vs PY"
+
+Shipping vs PY Label =
+VAR _growth = [Shipping Cost Growth %]
+VAR _arrow = IF( _growth >= 0, "▲ ", "▼ " )
+RETURN _arrow & FORMAT( ABS(_growth), "0.0%" ) & " vs PY"
+
+
+// ------------------------------------------------------------
+// 6. DATE TABLE (Create this via Modeling → New Table)
+// ------------------------------------------------------------
+
+DateTable =
+CALENDAR(
+    MIN( Sales[order_date] ),
+    MAX( Sales[order_date] )
+)
+
+// After creating DateTable, add these columns to it:
+
+Year = YEAR( DateTable[Date] )
+Month Number = MONTH( DateTable[Date] )
+Month Name = FORMAT( DateTable[Date], "MMM YYYY" )
+Quarter = "Q" & QUARTER( DateTable[Date] )
+Week Number = WEEKNUM( DateTable[Date] )
+Day Name = FORMAT( DateTable[Date], "dddd" )
+
+// Then: Modeling tab → Mark as Date Table → select [Date] column
+// Then: Create relationship between DateTable[Date] and Sales[order_date]
