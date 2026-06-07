@@ -1,0 +1,6 @@
+traffic_source_key,traffic_source,channel_type,is_paid
+1,Direct,Direct,False
+2,Email,Owned,False
+3,Organic,Organic,False
+4,Paid Ads,Paid,True
+5,Social Media,Paid/Organic,True

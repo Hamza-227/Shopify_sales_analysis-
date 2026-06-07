@@ -1,0 +1,6 @@
+payment_method_key,payment_method,payment_type,is_digital_wallet
+1,Apple Pay,Digital Wallet,True
+2,Cash on Delivery,COD,False
+3,Credit Card,Card,False
+4,Debit Card,Card,False
+5,PayPal,Digital Wallet,True
